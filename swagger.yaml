@@ -1,4 +1,7 @@
 openapi: 3.0.0
+servers:
+  - url: http://localhost:8080
+    description: Book publishing service server
 info:
   description: Spring Boot application for managing a book publishing house.
   version: 1.0.0
@@ -13,6 +16,8 @@ paths:
         - Author
       summary: Add a new Author
       operationId: createAuthor
+      security:
+        - bearerAuth: []
       responses:
         '201':
           $ref: '#/components/responses/CreatedResponse'
@@ -30,7 +35,7 @@ paths:
                     message: "Bad Request"
                     path: "/authors"
         '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
+          $ref: '#/components/responses/UnauthorizedError'
       requestBody:
         $ref: '#/components/requestBodies/CreateOrUpdateAuthorRequest'
       parameters: []
@@ -73,7 +78,96 @@ paths:
         - $ref: '#/components/parameters/pageNumber'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/sort'
+  /authors/{id}:
+    put:
+      tags:
+        - Author
+      summary: Update Author
+      operationId: updateAuthor
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/updateId'
+      responses:
+        '200':
+          description: 200 OK Response to PUT Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+              example:
+                name: J. K. Rowling
+                numberOfBooks: 20
+                _links:
+                  self:
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+        '400':
+          description: 400 BAD REQUEST Response to PUT Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                InvalidRequestParameter:
+                  value:
+                    timestamp: "2023-03-06T16:40:54.027+00:00"
+                    status: 400
+                    message: "Bad Request"
+                    path: "/authors/{id}"
+                AuthorNotFound:
+                  value:
+                    title: "Author not found"
+                    status: 404
+                    detail: "Author not founds: ID = 00000000-0000-0000-0000-000000000000"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateOrUpdateAuthorRequest'
+    get:
+      summary: Retrieve Author
+      tags:
+        - Author
+      operationId: getAuthor
+      parameters:
+        - $ref: '#/components/parameters/pathId'
+      responses:
+        '200':
+          description: 200 OK Response to GET Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+              example:
+                name: Leo
+                surname: Tolstoy
+                numberOfBooks: 100
+                _links:
+                  self:
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+        '400':
+          description: 400 BAD REQUEST Response to PUT Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                InvalidRequestParameter:
+                  value:
+                    timestamp: "2023-03-06T16:40:54.027+00:00"
+                    status: 400
+                    message: "Bad Request"
+                    path: "/authors/{id}"
+                AuthorNotFound:
+                  value:
+                    title: "Author not found"
+                    status: 404
+                    detail: "Author not founds: ID = 00000000-0000-0000-0000-000000000000"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Author:
       type: object
@@ -186,6 +280,22 @@ components:
                 example: J. K. Rowling
       required: true
   parameters:
+    pathId:
+      name: id
+      in: path
+      required: true
+      description: The id of the resource to retrieve.
+      schema:
+        type: string
+        format: uuid
+    updateId:
+      name: id
+      in: path
+      required: true
+      description: The id of the resource to update.
+      schema:
+        type: string
+        format: uuid
     pageNumber:
       name: page
       in: query
@@ -212,7 +322,7 @@ components:
       headers:
         Location:
           $ref: '#/components/headers/Location'
-    UnauthorizedResponse:
+    UnauthorizedError:
       description: 401 Unauthorized Error
       headers:
         WWW-Authenticate:
