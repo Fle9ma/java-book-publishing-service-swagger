@@ -55,7 +55,7 @@ paths:
                 _embedded:
                   item:
                     name: J. K. Rowling
-                    numOfBooks: 20
+                    numOfBooks: 10
                     _links:
                       self:
                         href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
@@ -97,7 +97,7 @@ paths:
                 $ref: '#/components/schemas/Author'
               example:
                 name: J. K. Rowling
-                numberOfBooks: 20
+                numberOfBooks: 10
                 _links:
                   self:
                     href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
@@ -138,9 +138,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Author'
               example:
-                name: Leo
-                surname: Tolstoy
-                numberOfBooks: 100
+                name: J. K. Rowling
+                numberOfBooks: 10
                 _links:
                   self:
                     href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
@@ -168,6 +167,8 @@ paths:
       tags:
         - Book
       operationId: createBook
+      security:
+        - bearerAuth: [ ]
       description: Publish a new book
       requestBody:
         required: true
@@ -258,7 +259,7 @@ paths:
     get:
       summary: Get authors for book
       tags:
-        - Book
+        - Author
       description: Get all authors for a given book
       operationId: getAuthorsForBook
       parameters:
