@@ -59,6 +59,8 @@ paths:
                     _links:
                       self:
                         href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+                      books:
+                        href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books'
                 _links:
                   self:
                     href: '{{baseURL}}/authors?page=1&size=1&sort=createdAt,desc'
@@ -101,6 +103,8 @@ paths:
                 _links:
                   self:
                     href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+                  books:
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books'
         '400':
           description: 400 BAD REQUEST Response to PUT Request
           content:
@@ -143,8 +147,10 @@ paths:
                 _links:
                   self:
                     href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+                  books:
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books'
         '400':
-          description: 400 BAD REQUEST Response to PUT Request
+          description: 400 BAD REQUEST Response to GET Request
           content:
             application/json:
               schema:
@@ -161,6 +167,58 @@ paths:
                     title: "Author not found"
                     status: 404
                     detail: "Author not founds: ID = 00000000-0000-0000-0000-000000000000"
+  /books/{id}/authors:
+    get:
+      summary: Get authors for book
+      tags:
+        - Author
+      description: Get all authors for a given book
+      operationId: getAuthorsForBook
+      parameters:
+        - $ref: '#/components/parameters/pathId'
+      responses:
+        '200':
+          description: 200 OK Response to GET Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorList'
+              example:
+                _embedded:
+                  item:
+                    name: J. K. Rowling
+                    numberOfBooks: 10
+                    _links:
+                      self:
+                        href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+                      books:
+                        href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books'
+                _links:
+                  self:
+                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors'
+                  first:
+                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors?page=1&size=1&sort=createdAt,desc'
+                  next:
+                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors?page=2&size=1&sort=createdAt,desc'
+                  last:
+                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors?page=10&size=1&sort=createdAt,desc'
+                page:
+                  size: 1
+                  totalElements: 10
+                  totalPages: 10
+                  number: 1
+        '400':
+          description: 400 BAD REQUEST Response to GET Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              example:
+                BookNotFound:
+                  value:
+                    title: "Book not found"
+                    status: 404
+                    detail: "Book not found: ID = 00000000-0000-0000-0000-000000000000"
   /books:
     post:
       summary: Publish a book
@@ -239,7 +297,7 @@ paths:
                       self:
                         href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000'
                       authors:
-                        href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+                        href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors'
 
                 _links:
                   self:
@@ -255,13 +313,12 @@ paths:
                   totalElements: 10
                   totalPages: 10
                   number: 1
-  /books/{id}/authors:
+  /books/{id}:
     get:
-      summary: Get authors for book
+      summary: Retrieve Book
       tags:
-        - Author
-      description: Get all authors for a given book
-      operationId: getAuthorsForBook
+        - Book
+      operationId: getBook
       parameters:
         - $ref: '#/components/parameters/pathId'
       responses:
@@ -270,24 +327,70 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthorList'
+                $ref: '#/components/schemas/Book'
+              example:
+                title: "The Grass is Always Greener"
+                isbn: "1-86092-049-7"
+                genre: Modern Times
+                _links:
+                  self:
+                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000'
+                  authors:
+                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors'
+        '400':
+          description: 400 BAD REQUEST Response to GET Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+              examples:
+                InvalidRequestParameter:
+                  value:
+                    timestamp: "2023-03-06T16:40:54.027+00:00"
+                    status: 400
+                    message: "Bad Request"
+                    path: "/books/{id}"
+                AuthorNotFound:
+                  value:
+                    title: "Book not found"
+                    status: 404
+                    detail: "Book not founds: ID = 00000000-0000-0000-0000-000000000000"
+  /authors/{id}/books:
+    get:
+      summary: Get books for author
+      tags:
+        - Book
+      description: Get all books for a given author
+      operationId: getBooksForAuthor
+      parameters:
+        - $ref: '#/components/parameters/pathId'
+      responses:
+        '200':
+          description: 200 OK Response to GET Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookList'
               example:
                 _embedded:
                   item:
-                    name: J. K. Rowling
-                    numberOfBooks: 10
+                    title: "The Grass is Always Greener"
+                    isbn: "1-86092-049-7"
+                    genre: Modern Times
                     _links:
                       self:
-                        href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000'
+                        href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000'
+                      authors:
+                        href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors'
                 _links:
                   self:
-                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors'
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books?page=1&size=1'
                   first:
-                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors?page=1&size=1&sort=createdAt,desc'
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books?page=0&size=1'
                   next:
-                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors?page=2&size=1&sort=createdAt,desc'
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books?page=2&size=1'
                   last:
-                    href: '{{baseURL}}/books/00000000-0000-0000-0000-000000000000/authors?page=10&size=1&sort=createdAt,desc'
+                    href: '{{baseURL}}/authors/00000000-0000-0000-0000-000000000000/books?page=10&size=1'
                 page:
                   size: 1
                   totalElements: 10
@@ -322,6 +425,7 @@ components:
         _links:
           required:
             - self
+            - books
           allOf:
             - $ref: '#/components/schemas/SelfLink'
     AuthorLink:
@@ -367,6 +471,7 @@ components:
         _links:
           required:
             - self
+            - authors
           allOf:
             - $ref: '#/components/schemas/SelfLink'
     BookList:
